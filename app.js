@@ -6,7 +6,6 @@ const baseUserURL = "http://localhost:3000/users"
 fetch(baseCardURL)
     .then(res => res.json())
     .then(renderCards)
-    // .then(console.log)
 
 function renderCards(cards) {
     const $main = document.querySelector('main')
@@ -18,9 +17,6 @@ function renderCards(cards) {
         renderCardImage(card, magicCard)
         renderButton(card, magicCard)
     })
-    // const deleteButton = document.querySelector('button')
-    // console.log(deleteButton)
-    // button.addEventListener('click', deleteCard)
 }
 
 function renderCardName(card, magicCard) {
