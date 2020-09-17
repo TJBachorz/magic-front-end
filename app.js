@@ -1,7 +1,9 @@
 console.log("working")
 
+let userId
 const baseCardURL = "http://localhost:3000/magic_cards/"
 const baseUserURL = "http://localhost:3000/users"
+const likesURL = "http://localhost:3000/likes"
 
 fetch(baseCardURL)
     .then(res => res.json())
@@ -11,11 +13,12 @@ function renderCards(cards) {
     const $main = document.querySelector('main')
     cards.forEach(card => {
         const magicCard = document.createElement('div')
-        magicCard.classList.add(`card-${card.id}`)
+        magicCard.classList.add(`card-${card.id}`, "card")
         $main.append(magicCard)
         renderCardName(card, magicCard)
+        renderLikeButton(card, magicCard)
         renderCardImage(card, magicCard)
-        renderButton(card, magicCard)
+        renderXButton(card, magicCard)
     })
 }
 
@@ -28,12 +31,21 @@ function renderCardName(card, magicCard) {
 function renderCardImage(card, magicCard) {
     const img = document.createElement('img')
     img.src = card.imageUrl
+    img.onerror = function() {img.src = "https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg"}
     magicCard.append(img)
 }
 
-function renderButton(card, magicCard) {
+function renderLikeButton(card, magicCard) {
     const button = document.createElement('button')
-    button.classList.add(`${card.id}`)
+    button.classList.add(`${card.id}`, "like-button", "hidden")
+    button.textContent = "LIKE"
+    magicCard.append(button)
+    button.addEventListener('click', (createLike))
+}
+
+function renderXButton(card, magicCard) {
+    const button = document.createElement('button')
+    button.classList.add(`${card.id}`, "delete")
     button.textContent = "X"
     magicCard.append(button)
     button.addEventListener('click', deleteCard)
@@ -47,41 +59,31 @@ $newUserForm.addEventListener('submit', () => {
     const username = formData.get('username')
     const email = formData.get('email')
     const password = formData.get('password')
-    fetch(baseUserURL, {
-        method: "POST",
-        headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            user: {
-                username: username,
-                email: email,
-                password: password
-            }
-        })
-    })
-    .then(res => res.json())
-    .then(showNewUser)
+    const user = {username, email, password}
+    fetchCall(baseUserURL, "POST", {user})
+        .then(res => res.json())
+        .then(showNewUser)
 })
 
 function showNewUser(user) {
-    const usernameInput = document.querySelector('#username')
     const section = document.querySelector('.new-user')
-    console.log(section.childNodes.length)
-    if (user.username[0] == ["Username's length must be between 6 and 14 characters."] || ["${usernameInput.value} cannot be blank."] || [`tjbachorz has already been used.`]) {
-        deletePTags(section)
+    if (user.errors) {
+        removeWarning(section)
         const warning = document.createElement('p')
-        warning.textContent = user.username
+        warning.classList.add('warning')
+        let error = findError(user.errors)
+        warning.textContent = error
         warning.style.color = "red"
         section.prepend(warning)
     } else {
-        deletePTags(section)
+        removeWarning(section)
         const form = document.querySelector('#new-user-form')
         section.removeChild(form)
         const h1 = document.createElement('h1')
         h1.textContent = `Welcome ${user.username}`
         section.append(h1)
+        removeHiddenFromLikes()
+        userId = user.id
     }
 }
 
@@ -95,9 +97,50 @@ function deleteCard(event) {
     card.remove()
 }
 
-function deletePTags(section) {
-    if (section.childNodes.length > 3) {
-        const p = document.querySelector('p')
-        p.remove()
+function removeWarning(section) {
+    const warning = section.querySelector('.warning')
+    if (warning) {
+        warning.remove()
     }
+}
+
+function findError(errors) {
+    const errorMessages = Object.values(errors)
+    return errorMessages[0]
+    // if (Object.value(errors.username) {
+    //     return errors.username[0]
+    // } else if (errors.email) {
+    //     return errors.email[0]
+    // } else {
+    //     return errors.password[0]
+    // }
+}
+
+function createLike(event) {
+    console.log("like")
+    // const button = event.target
+    // button.classList.add('liked')
+    // fetchCall(likesURL, "POST",  {
+        
+    //     body: JSON.stringify({
+    //         user_id: 
+    //         magic_card_id:
+    //     })
+    // })
+}
+
+function removeHiddenFromLikes() {
+    const likes = document.querySelectorAll('.like-button')
+    likes.forEach(like => {
+        like.classList.remove("hidden")
+    })
+}
+
+function fetchCall(url, method, bodyData) {
+    const headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+    }
+    const body = JSON.stringify(bodyData)
+    return fetch(url, {method, headers, body})
 }

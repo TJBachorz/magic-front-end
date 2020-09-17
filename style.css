@@ -9,7 +9,54 @@ main {
     align-items: center;
 }
 
+.new-user {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+input {
+    padding: 8px;
+    margin: 5px;
+}
+
+#new-user-form {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
 button {
     color:red;
     background-color: black;
+}
+
+img {
+    width: 250px;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.like-button {
+    background-color: green;
+    color: black;
+    margin-bottom: 10px;
+}
+
+.delete {
+    margin-top: 10px;   
+}
+
+/* .card.liked {
+
+} */
+
+main > .card > .hidden {
+    text-decoration: none;
+    display: none;
 }
